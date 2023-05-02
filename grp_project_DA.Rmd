@@ -24,11 +24,12 @@ Merging datasets
 
 
 #filtering required columns from all datasets
-neduc <- data.frame(educ$hhid,educ$s02q08)
-nhealth<-data.frame(health$hhid,health$s03q24)
-nincome<-data.frame(income$hhid,income$s13q02)
-nremittances<-data.frame(remittances$hhid,remittances$s05q02a)
-nfood<-data.frame(food$hhid,food$s06cq08)
+neduc <- data.frame(educ$hhid,educ$zone, educ$state, educ$lga, educ$sector, educ$ea, educ$indiv, educ$s02q08)
+nhealth<-data.frame(health$hhid,health$zone,health$state, health$lga,health$sector, health$ea, health$indiv, health$s03q24)
+nincome<-data.frame(income$hhid, income$zone_id, income$state_id, income$lga, income$sector, income$ea_code, income$source_cd, income$s13q02)
+nremittances<-data.frame(remittances$hhid, remittances$zone, remittances$state, remittances$lga, remittances$sector, remittances$indiv, remittances$ea, remittances$s05q02b,remittances$s05q02a)
+nfood<-data.frame(food$hhid,food$state, food$sector, food$zone, food$lga, food$ea,
+food$s06cq08)
 
 neduc <- neduc %>% rename(hhid = educ.hhid)
 nhealth <- nhealth %>% rename(hhid = health.hhid)
