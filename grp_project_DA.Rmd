@@ -171,3 +171,62 @@ merged_data_drop <- merged_data_dr %>% drop_na(education, health, labor, gender,
 summary(lm(educated_spef1 ~ health + labor + yearbirth + isfemale*marriage, data = merged_data))
 summary(lm(educated_spef2 ~ health + labor + yearbirth + isfemale*marriage, data = merged_data))
 ```
+# Ruqi's proposed alternative to the regression code
+Please note that the regressions have been assigned names in the off chance that there is a wait to plot MLRs.
+```{r}
+
+#Main regression with interaction term
+mint<-lm(educated_spef1 ~ health + labor + yearbirth + isfemale+ marriage+ isfemale*marriage, data = merged_data_drop)
+summary(mint)
+#Main regression without interaction term
+mwithoutint<-lm(educated_spef1 ~ health + labor + yearbirth + isfemale+ marriage+ isfemale*marriage, data = merged_data_drop)
+summary(mwithoutint)
+```
+
+```{r}
+#Alternative reaction with interaction term
+aint<-lm(educated_spef2 ~ health + labor + yearbirth + isfemale+ marriage+ isfemale*marriage, data = merged_data_drop)
+summary(aint)
+#Alternative Specification without interaction term
+awithoutint<-lm(educated_spef2 ~ health + labor + yearbirth + isfemale+marriage, data = merged_data_drop)
+summary(awithoutint)
+```
+# Ruqi's data visualization
+```{r}
+#Plotting the variables
+#Education is a categorical variable. It is most apt to use a bar graph to plot education.
+
+#Our first specification uses a cutoff between those who received no education at all vs. those who received some education.
+#0=No education and 1= Any education
+ggplot(merged_data_drop, aes(x=educated_spef1)) +
+  geom_bar(position = "dodge", width = 0.25, color= "blue", fill= "blue") + 
+  labs(x = "Level of Education", y = "Frequency") 
+#Please note we need to edit the y axis to show exactly the breakdown of the data.
+
+#Our breakdown of data for the alternative specification.
+#0= obtained at most a senior school certificate.
+#1=obtained education beyond a senior school certificate
+```
+
+
+```{r}
+##Our breakdown of data for the alternative specification.
+#0= obtained at most a senior school certificate.
+#1=obtained education beyond a senior school certificate
+ggplot(merged_data_drop, aes(x=educated_spef2)) +
+  geom_bar(position = "dodge", width = 0.25, color= "pink", fill= "pink") + 
+  labs(x = "Level of Education", y = "Frequency")
+```
+
+
+```{r}
+#Our data for labor is continuous. This variable we used looks at the amount of salaried hours those who took the survery worked in the last 7 days. To visualize this data, a boxplot is more appropriate. This will also provide us with some idea as to how the data is distributed and where outliers are.
+ggplot(merged_data_drop, aes(labor)) +
+  geom_boxplot(color = "black", outlier.colour = "blue")+
+  labs(title = "Number of Salaried Hours Worked in the Last 7 Days",
+      x = "Hours",
+      y = "Frequency")
+# There are numerous outliers on either side of the data
+#how to edit this code to show the median?
+
+```
