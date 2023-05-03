@@ -9,10 +9,9 @@ library(gt)
 library(dplyr)
 educ <- read.csv("sect2_education.csv", na.strings = " ")
 health<-read.csv("sect3_health.csv", na.strings = " ")
-income<-read.csv("sect13_income.csv", na.strings = " ")
 remittances<-read.csv("sect5_remittances.csv", na.strings = " ")
-food<-read.csv("sect6c_aggregate_food_1.csv", na.strings = " ")
 roster<-read.csv("sect1_roster.csv", na.strings = " ")
+labour <- read.csv("sect4a1_labour.csv", na.strings = " ")
 
 
 
@@ -20,88 +19,25 @@ roster<-read.csv("sect1_roster.csv", na.strings = " ")
 Merging datasets
 
 
-#filtering required columns from all datasets
+neduc <- subset(educ, select=c("hhid", "zone","lga", "state", "sector", "indiv" ,"ea", "s02q08"))
+nhealth <- subset(health, select=c("hhid", "zone","lga", "state", "sector", "indiv" ,"ea", "s03q24"))
+nlabour <- subset(labour, select=c("hhid", "zone","lga", "state", "sector", "indiv" ,"ea", "s04aq05", "s04aq12"))
+nremittances <- subset(remittances, select=c("hhid", "zone","lga", "state", "sector", "indiv" ,"ea", "s05q02b", "s05q02a") )
+nroster <- subset(roster, select=c("hhid", "zone","lga", "state", "sector", "indiv" ,"ea", "s01q02"))
 
-
-neduc <- data.frame(educ$hhid,educ$zone, educ$state, educ$lga, educ$sector, educ$ea, educ$indiv, educ$s02q08)
-nhealth<-data.frame(health$hhid,health$zone,health$state, health$lga,health$sector, health$ea, health$indiv, health$s03q24)
-nincome<-data.frame(income$hhid, income$zone_id, income$state_id, income$lga, income$sector, income$ea_code, income$source_cd, income$s13q02)
-nremittances<-data.frame(remittances$hhid, remittances$zone, remittances$state, remittances$lga, remittances$sector, remittances$indiv, remittances$ea, remittances$s05q02b,remittances$s05q02a)
-nfood<-data.frame(food$hhid,food$state, food$sector, food$zone, food$lga, food$ea,
-food$s06cq08) 
-nroster<-data.frame(roster$hhid,roster$zone, roster$state, roster$lga, roster$sector, roster$ea, roster$indiv, roster$s01q02)
-
-#Renaming columns
-neduc <- neduc %>% rename(hhid = educ.hhid, zone=educ.zone, indiv=educ.indiv)
-neduc <- neduc %>% rename(educc=educ.s02q08)
-
-nhealth <- nhealth %>% rename(hhid = health.hhid, zone=health.zone, state=health.state, lga=health.lga, sector=health.sector, ea=health.ea, indiv=health.indiv)
-nincome <- nincome %>% rename(hhid = income.hhid, zone=income.zone_id, state=income.state_id, lga=income.lga, sector=income.sector, ea=income.ea_code)
-nremittances <- nremittances %>% rename(hhid = remittances.hhid, zone=remittances.zone, state=remittances.state, lga=remittances.lga, sector=remittances.sector, ea=remittances.ea, indiv=remittances.indiv)
-nfood <- nfood %>% rename(hhid = food.hhid,hhid = food.hhid, zone=food.zone, state=food.state, lga=food.lga, sector=food.sector, ea=food.ea)
-nroster <- nroster %>% rename(hhid = roster.hhid, zone=roster.zone, state=roster.state, lga=roster.lga, sector=roster.sector, ea=roster.ea, indiv=roster.indiv)
-
-
-#merging all data sets
-merged_data <- inner_join(neduc, nhealth, by=c('hhid','zone','state','lga','sector','ea','indiv'))%>% 
-               inner_join(nincome,by =c('hhid','zone','state','lga','sector','ea')) %>% 
-               inner_join(nremittances, by = c('hhid','zone','state','lga','sector','ea','indiv')) %>% 
-               inner_join(nfood, by = c('hhid','zone','state','lga','sector','ea'))%>% 
-               inner_join(nroster, by = c('hhid','zone','state','lga','sector','ea'))
-
-#filtering required columns from all datasets
-neduc <- data.frame(educ$hhid,educ$zone, educ$state, educ$lga, educ$sector, educ$ea, educ$indiv, educ$s02q08)
-nhealth<-data.frame(health$hhid,health$zone,health$state, health$lga,health$sector, health$ea, health$indiv, health$s03q24)
-nincome<-data.frame(income$hhid, income$zone_id, income$state_id, income$lga, income$sector, income$ea_code, income$source_cd, income$s13q02)
-nremittances<-data.frame(remittances$hhid, remittances$zone, remittances$state, remittances$lga, remittances$sector, remittances$indiv, remittances$ea, remittances$s05q02b,remittances$s05q02a)
-nfood<-data.frame(food$hhid,food$state, food$sector, food$zone, food$lga, food$ea,
-food$s06cq08) 
-nroster<-data.frame(roster$hhid,roster$zone, roster$state, roster$lga, roster$sector, roster$ea, roster$indiv, roster$s01q02)
+#Merging variables in one dataset
+merged_data <- inner_join(neduc, nhealth,by=c('hhid', 'zone',
+                            'lga', 'state', 'sector', 'indiv' ,'ea') ) %>% 
+  inner_join(nlabour,by=c('hhid', 'zone',
+                            'lga', 'state', 'sector', 'indiv' ,'ea') ) %>%  
+  inner_join(nremittances, by=c('hhid', 'zone',
+                            'lga', 'state', 'sector', 'indiv' ,'ea') ) %>% 
+  inner_join(nroster, by=c('hhid', 'zone',
+                            'lga', 'state', 'sector', 'indiv' ,'ea') ) 
 
 
 
-neduc <- neduc %>% rename(hhid = educ.hhid, zone = educ.zone, state = educ.state, lga = educ.lga,
-                          ea = educ.ea, sector = educ.sector, indiv = educ.indiv)
-nhealth <- nhealth %>% rename(hhid = health.hhid,zone = health.zone, state = health.state, sector = health.sector, ea = health.ea, lga = health.lga, indiv = health.indiv )
-nincome <- nincome %>% rename(hhid = income.hhid,zone = income.zone_id, state = income.state_id, 
-                              ea = income.ea_code, lga = income.lga, sector = income.sector)
-nremittances <- nremittances %>% rename(hhid = remittances.hhid,zone = remittances.zone,
-                                        state = remittances.state, sector = remittances.sector, 
-                                        lga = remittances.lga,
-                                        ea = remittances.ea, indiv = remittances.indiv)
-nremittances <- nremittances %>% rename(zone = remittances.zone)
-nfood <- nfood %>% rename(hhid = food.hhid, zone = food.zone, state = food.state, 
-                          sector = food.sector, lga = food.lga, ea = food.ea)
-nroster <- nroster %>% rename(hhid = roster.hhid, zone=roster.zone, state=roster.state, lga=roster.lga, sector=roster.sector, ea=roster.ea, indiv=roster.indiv)
 
-
-#UPDATED
-#Merging datasets
-merge_data <- merge(neduc, nhealth, by=c('hhid', 'zone',
-                            'lga', 'state', 'sector', 'indiv' ,'ea'), all=TRUE)
-merge_data <- merge(merge_data, nincome, by=c('hhid', 'zone',
-                            'lga', 'state', 'sector','ea'), all=TRUE)
-
-merge_data <- merge(merge_data, nfood, by=c('hhid', 'zone',
-                            'lga', 'state', 'sector','ea'), all=TRUE)  
-
-merge_data <- merge(merge_data, nremittances, by=c('hhid', 'zone',
-                            'lga', 'state', 'sector', 'indiv' ,'ea'), all=TRUE)
-
-merge_data <- merge(merge_data, nroster, by=c('hhid', 'zone',
-                            'lga', 'state', 'sector', 'indiv' ,'ea'), all=TRUE)
-
-
-
-#merging all data sets
-merged_data <- inner_join(neduc, nhealth, by = 'hhid','ea')%>% 
-               inner_join(nincome, by = 'hhid', 'ea') %>% 
-               inner_join(nremittances, by = 'hhid') %>% 
-               inner_join(nfood, by = 'hhid') 
-
-merged_data1 <- inner_join(neduc, nhealth, nremittances, by = c('hhid', 'zone',
-                            'lga', 'state', 'sector', 'indiv' ,'ea')%>% 
-  inner_join(nincome, nfood, by = 'hhid') %>% 
 
 #Ruqi's code
 #Merge Dataset Per Joint Unique Identifiers
