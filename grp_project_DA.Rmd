@@ -103,4 +103,32 @@ merged_data1 <- inner_join(neduc, nhealth, nremittances, by = c('hhid', 'zone',
                             'lga', 'state', 'sector', 'indiv' ,'ea')%>% 
   inner_join(nincome, nfood, by = 'hhid') %>% 
 
+#Ruqi's code
+#Merge Dataset Per Joint Unique Identifiers
+
+#please note this is not adjusted to a certain hh or indiv level.
+nEducation<-subset(Education, select = c( 'hhid','zone','lga', 'state', 'sector', 'indiv' ,'ea','s02q08'))
+nRemittances<-subset(Remittances, select = c('hhid', 'zone','lga', 'state', 'sector', 'indiv' ,'ea','s05q02a'))
+nRoster<-subset(Roster, select = c('hhid','zone','lga', 'state', 'sector', 'indiv' ,'ea','s01q02'))
+nHealth<-subset(Health, select = c( 'hhid','zone','lga', 'state', 'sector', 'indiv' ,'ea','s03q24'))
+
+#Merging Existin Datasets using Merge()
+merge_data <- merge(nEducation, nHealth, by=c( 'hhid','zone',
+                            'lga', 'state', 'sector', 'indiv' ,'ea'), all=TRUE)
+
+merge_data <- merge(merge_data, nRemittances, by=c('hhid','zone',
+                            'lga', 'state', 'sector', 'indiv' ,'ea'), all=TRUE)
+
+merge_data <- merge(merge_data, nRoster, by=c( 'hhid','zone',
+                            'lga', 'state', 'sector', 'indiv' ,'ea'), all=TRUE)
+#Rename the Columns on the Merged Data Set
+merge_data <- merge_data %>% 
+    rename(education=s02q08, health=s03q24, remittances=s05q02a,roster=s01q02)
+
+#Cleaning missing Values from the data set
+ merge_data_drop <- merge_data %>% drop_na(education, health, remittances, roster)
+ 
+
+
+
 
