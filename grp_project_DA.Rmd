@@ -74,6 +74,7 @@ nfood <- nfood %>% rename(hhid = food.hhid, zone = food.zone, state = food.state
                           sector = food.sector, lga = food.lga, ea = food.ea)
 nroster <- nroster %>% rename(hhid = roster.hhid, zone=roster.zone, state=roster.state, lga=roster.lga, sector=roster.sector, ea=roster.ea, indiv=roster.indiv)
 
+
 #UPDATED
 #Merging datasets
 merge_data <- merge(neduc, nhealth, by=c('hhid', 'zone',
