@@ -67,4 +67,107 @@ merge_data <- merge_data %>%
 
 
 
+#Ella's code (temporary)
 
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+setwd("/Users/ella/Downloads/Data Analysis Final Project/NGA_2018_LSS_v01_M_CSV/Household")
+
+library(tidyverse)
+library(stargazer)
+library(gt)
+library(dplyr)
+
+educ <- read.csv("sect2_education.csv", na.strings = " ")
+health<-read.csv("sect3_health.csv", na.strings = " ")
+labour <- read.csv("sect4a1_labour.csv", na.strings = " ")
+remittances<-read.csv("sect5_remittances.csv", na.strings = " ")
+roster<-read.csv("sect1_roster.csv", na.strings = " ")
+
+#s02q08: "What is [NAME]'s highest qualification attained?"
+#s02q13: "What is the main reason why [NAME] is not currently attending school?"
+neduc <- subset(educ, select=c("hhid", "zone","lga", "state", "sector", "indiv","ea", "s02q08", "s02q13"))
+#s03q24: "Does [NAME] have difficulty walking or climbing steps?"
+nhealth <- subset(health, select=c("hhid", "zone","lga", "state", "sector", "indiv","ea", "s03q24"))
+#s04aq05: "During the past 7 days, how many hours has [NAME] done wage/salaried work?"
+nlabour <- subset(labour, select=c("hhid", "zone","lga", "state", "sector", "indiv", "ea", "s04aq05"))
+#s05q02a: "What was the amount of cash [NAME] received?"
+#s05q02a: "Currency"
+nremittances <- subset(remittances, select=c("hhid", "zone","lga", "state", "sector", "indiv" ,"ea", "s05q02a", "s05q02b") )
+#s01q02: "What is the gender of [NAME]?"
+#s01q06b: "Year of birth"
+#s01q07: "What is [NAME]'s present marital status?"
+nroster <- subset(roster, select=c("hhid", "zone","lga", "state", "sector", "indiv", "ea", "s01q02", "s01q06b", "s01q07"))
+
+```
+
+
+```{r}
+#Merging Data
+merged_data <- inner_join(neduc, nhealth,by=c('hhid', 'zone',
+                            'lga', 'state', 'sector', 'indiv' ,'ea') ) %>% 
+  inner_join(nlabour,by=c('hhid', 'zone',
+                            'lga', 'state', 'sector', 'indiv' ,'ea') ) %>%  
+  inner_join(nroster, by=c('hhid', 'zone',
+                            'lga', 'state', 'sector', 'indiv' ,'ea') ) %>%
+  inner_join(nremittances, by=c('hhid', 'zone',
+                            'lga', 'state', 'sector', 'indiv' ,'ea') )
+```
+
+
+```{r}
+#Renaming variables for user friendliness
+merged_data <- merged_data %>% 
+    rename(education = s02q08, why = s02q13, health = s03q24, labor = s04aq05, remittances = s05q02a, currency = s05q02b, gender = s01q02, yearbirth = s01q06b, marriage = s01q07)
+```
+
+```{r}
+#Checking data
+print("Education:")
+typeof(merged_data$education)
+table(merged_data$education)
+print("Why:")
+typeof(merged_data$why)
+table(merged_data$why)
+print("Health:")
+typeof(merged_data$health)
+table(merged_data$health) #Note: Need to fix health because it is a list
+print("Labor:")
+typeof(merged_data$labor)
+table(merged_data$labor)
+print("Gender:")
+typeof(merged_data$gender)
+table(merged_data$gender)
+print("Birth Year:")
+typeof(merged_data$yearbirth)
+table(merged_data$yearofbirth) #Note: Why is this table of extent 0?
+```
+
+```{r}
+#Creating binary for gender (isfemale, 0 = No and 1 = Yes)
+merged_data$isfemale <- ifelse(merged_data$gender == 2, 1, 0)
+```
+
+```{r}
+#Creating the first binary education specification
+merged_data$educated_spef1 <- ifelse(merged_data$education == 1, 0, 1)
+table(merged_data$educated_spef1)
+
+#Creating the second binary education specification
+merged_data$educated_spef2 <- ifelse(merged_data$education <= 6, 0, 1)
+table(merged_data$educated_spef2)
+```
+
+```{r}
+#Dropping those who are done with the school system
+merged_data_dr <- subset(merged_data, why != 1 & why != 15)
+#Dropping NA observations
+merged_data_drop <- merged_data_dr %>% drop_na(education, health, labor, gender, yearbirth, marriage)
+```
+
+
+```{r}
+#Running regressions
+summary(lm(educated_spef1 ~ health + labor + yearbirth + isfemale*marriage, data = merged_data))
+summary(lm(educated_spef2 ~ health + labor + yearbirth + isfemale*marriage, data = merged_data))
+```
