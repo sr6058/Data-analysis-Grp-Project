@@ -32,7 +32,7 @@ food$s06cq08)
 nroster<-data.frame(roster$hhid,roster$zone, roster$state, roster$lga, roster$sector, roster$ea, roster$indiv, roster$s01q02)
 
 #Renaming columns
-neduc <- neduc %>% rename(hhid = educ.hhid, zone=educ.zoa, indiv=educ.indiv)
+neduc <- neduc %>% rename(hhid = educ.hhid, zone=educ.zone, indiv=educ.indiv)
 neduc <- neduc %>% rename(educc=educ.s02q08)
 
 nhealth <- nhealth %>% rename(hhid = health.hhid, zone=health.zone, state=health.state, lga=health.lga, sector=health.sector, ea=health.ea, indiv=health.indiv)
