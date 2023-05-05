@@ -251,3 +251,146 @@ stargazer(logit.fit.1, logit.fit.clog, type = "text",
           dep.var.labels.include = FALSE, single.row=TRUE, font.size = "small")
 
 ```
+
+# Maitha's Code
+
+setwd("~/Documents/Spring'23/Data Anlaysis/Project")
+library(tidyverse)
+library(stargazer)
+library(lmtest)
+library(gt)
+library(dplyr)
+library(mfx)
+educ <- read.csv("sect2_education.csv", na.strings = " ")
+health<-read.csv("sect3_health.csv", na.strings = " ")
+roster<-read.csv("sect1_roster.csv", na.strings = " ")
+labour <- read.csv("sect4a1_labour.csv", na.strings = " ") 
+
+# MERGING
+neduc <- subset(educ, select=c("hhid", "zone","lga", "state", "sector", "indiv" ,"ea", "s02q08", "s02q13"))
+
+nhealth <- subset(health, select=c("hhid", "zone","lga", "state", "sector", "indiv" ,"ea", "s03q24"))
+
+nlabour <- subset(labour, select=c("hhid", "zone","lga", "state", "sector", "indiv" ,"ea", "s04aq05", "s04aq43"))
+
+nroster <- subset(roster, select=c("hhid", "zone","lga", "state", "sector", "indiv" ,"ea", "s01q02", "s01q07"))
+
+#Merging variables in one dataset
+
+merged_data <- inner_join(neduc, nhealth,by=c('hhid', 'zone',
+                            'lga', 'state', 'sector', 'indiv' ,'ea') ) %>% 
+  inner_join(nlabour,by=c('hhid', 'zone',
+                            'lga', 'state', 'sector', 'indiv' ,'ea') ) %>%  
+  inner_join(nroster, by=c('hhid', 'zone',
+                            'lga', 'state', 'sector', 'indiv' ,'ea') ) 
+                            
+  # Rename
+  merged_data <- merged_data %>% 
+  rename(education0= s02q08, educ.s02q13= s02q13, health=s03q24, gender0=s01q02, marriage=s01q07, labour.hrs=s04aq05, labour.wage=s04aq43) 
+  
+  # Filtering
+  #Creating a binary variable for gender, instead of being levels
+merged_data$gender <- ifelse(merged_data$gender0 == 2, 1, 0)
+
+#Creating the first binary education variable
+merged_data$education <- ifelse(merged_data$education0 == 1, 0, 1)
+
+#Creating the second binary education for alternative specification
+merged_data$education.alt <- ifelse(merged_data$education0 <= 6, 0, 1)
+
+#Dropping those who are done with the school system (For education) + who are too young to walk(For health) + who have informal relationships (For marraige)
+
+merged_data1 <- subset(merged_data, educ.s02q13 != 1 & educ.s02q13 != 15, health !=-1)
+merged_data1 <- subset(merged_data, labour.wage != 0)
+merged_data1 <- subset(merged_data, marriage != 3)
+
+#Dropping NA observations
+merged_data1 <- merged_data1 %>% drop_na(education0, health, labour.hrs, gender0, marriage,labour.wage) 
+
+#Choosing the levels according to our specific categories for marriage
+
+current_levels <- c(1,2,4,5,6,7) 
+new_levels <- c(0,1,2)
+
+merged_data1$marriage.fct <- ifelse(merged_data1$marriage %in% current_levels[1:2], new_levels[2], ifelse(merged_data1$marriage %in% current_levels[4:6], new_levels[3],0))
+
+levels(merged_data1$marriage.fct) <- new_levels 
+
+merged_data1$marriage.fct <- as.factor(merged_data1$marriage.fct)
+merged_data1$marriage.fct <- relevel(merged_data1$marriage.fct, ref = "0")
+
+# Outliers
+#Box plot of labour.hrs and labour.wage
+ggplot(merged_data1, aes(labour.hrs)) +
+  geom_boxplot(color = "black", outlier.colour = "blue")+
+  labs(title = "Number of Salaried Hours Worked in the Last 7 Days",
+      x = "Hours",
+      y = "Frequency") 
+
+ggplot(merged_data1, aes(labour.wage)) +
+  geom_boxplot(color = "black", outlier.colour = "blue")+
+  labs(title = "Last cash payment for this job (excluding in-kind payment)",
+      x = "Payment (NAIRA)",
+      y = "Frequency") 
+
+#histogram of labour.hrs and labour.wage
+
+hist_labour.hrs <- merged_data1$labour.hrs
+hist(hist_labour.hrs)
+
+hist_labour.wage <- merged_data1$labour.wage
+hist(hist_labour.wage)
+
+#Removing the outliers of labour.wage that have a number > 100000
+
+length(which(merged_data1$labour.wage > 1000000)) 
+merged_data1 <- subset(merged_data1, labour.wage < 1000000)
+
+
+# Regression
+
+#Running the first specification, without an interaction term
+
+regression0 <- lm(education ~ health + labour.hrs + labour.wage + marriage.fct + gender, data=merged_data1)
+summary(regression0)
+
+#Running the first specification, with an interaction term
+
+regression1 <- lm(education ~ health + labour.hrs + labour.wage + marriage.fct + gender + marriage.fct*gender, data=merged_data1)
+summary(regression1)
+
+#Running the alternative specification, without an interaction term
+
+regression2 <- lm(education.alt ~ health + labour.hrs + labour.wage + marriage1 + gender, data=merged_data1)
+summary(regression2)
+
+#Running the alternative specification, without an interaction term
+
+regression3 <- lm(education.alt ~ health + labour.hrs + labour.wage + marriage1 + gender + marriage1*gender, data=merged_data1)
+summary(regression3)
+
+
+# Robust SE
+
+#calculate robust standard errors for model coefficients
+coeftest(regression1, vcov = vcovHC(regression1, type = 'HC3'))
+
+#Table showing OLS and ROBUST standard errors
+stargazer(regression1,coeftest(regression1, vcovHC), type='text')
+
+
+#Joint significance under ROBUST standard errors
+
+linearHypothesis(regression1, c("marriage1=0", "health=0", "gender=0", "labour.wage=0", "labour.hrs=0"), white.adjust = "hc1")
+summary(regression1)$fstatistic 
+
+
+# LPM/ LOGIT
+
+lpm <- lm(education ~ health + labour.hrs + labour.wage + marriage1 + gender + marriage1*gender, data=merged_data1)
+summary(lpm)
+
+logit <- glm(education ~ health + labour.hrs + labour.wage + marriage1 + gender + marriage1*gender, data=merged_data1, family=binomial(link='logit'))
+summary(logit) 
+
+logitmfx(education ~ health + labour.hrs + labour.wage + marriage1 + gender + marriage1*gender, data=merged_data1, atmean=TRUE) 
