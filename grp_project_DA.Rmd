@@ -230,3 +230,24 @@ ggplot(merged_data_drop, aes(labor)) +
 #how to edit this code to show the median?
 
 ```
+
+#Smriti: Added logit model analysis for the main regression
+
+
+Logit model analysis:
+```{r}
+logit.fit.1 = glm(educated_spef1 ~ health + labor + yearbirth + isfemale+ marriage,
+                  data=merged_data_drop,
+                  family=binomial(link=logit) )
+
+logit.fit.clog = glm(educated_spef1 ~ health + labor + yearbirth + isfemale+ marriage,
+                  data=merged_data_drop,
+                  family=binomial(link="cloglog") )
+
+stargazer(logit.fit.1, logit.fit.clog, type = "text", 
+          title = "Regression Results",
+          header = FALSE, digits = 2,
+          dep.var.caption = "Dependent Variable: education",
+          dep.var.labels.include = FALSE, single.row=TRUE, font.size = "small")
+
+```
