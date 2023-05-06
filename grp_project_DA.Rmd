@@ -394,3 +394,13 @@ logit <- glm(education ~ health + labour.hrs + labour.wage + marriage1 + gender 
 summary(logit) 
 
 logitmfx(education ~ health + labour.hrs + labour.wage + marriage1 + gender + marriage1*gender, data=merged_data1, atmean=TRUE) 
+
+# sexy plot
+#Creating a visualization for regression
+# DROP NAS
+merged_data_new <- merged_data_new %>% drop_na(education, health, labor.hours, gender1, marriage.fct,labor.wages) 
+# regression
+softlaunch<-lm(maineducation~gender1+labor.hours+labor.wages+marriage.fct+ health + marriage.fct*gender1, data=merged_data_new)
+install.packages("car")
+library(car)
+avPlots(softlaunch)
