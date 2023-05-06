@@ -404,3 +404,196 @@ softlaunch<-lm(maineducation~gender1+labor.hours+labor.wages+marriage.fct+ healt
 install.packages("car")
 library(car)
 avPlots(softlaunch)
+
+
+
+Smriti : Changes with log variable:
+
+setwd("C:/Users/hp/Desktop/DA grp project")
+library(tidyverse)
+library(stargazer)
+library(lmtest)
+library(gt)
+library(dplyr)
+library(mfx)
+library(car)
+educ <- read.csv("sect2_education.csv", na.strings = " ")
+health<-read.csv("sect3_health.csv", na.strings = " ")
+roster<-read.csv("sect1_roster.csv", na.strings = " ")
+labour <- read.csv("sect4a1_labour.csv", na.strings = " ") 
+
+
+```
+
+Variables description:
+
+Education:
+#s02q08: "What is [NAME]'s highest qualification attained?"
+#s02q13: "What is the main reason why [NAME] is not currently attending school?"
+
+Disability:
+#s03q24: "Does [NAME] have difficulty walking or climbing steps?"
+
+Labor:
+#s04aq05: "During the past 7 days, how many hours has [NAME] done wage/salaried work?"
+#s01q07: "How much was [NAME]'s last cash payment for this job (excluding in-kind payment)?"
+
+Roster:
+#s01q02: "What is the gender of [NAME]?"
+#s01q07: "What is [NAME]'s present marital status?"
+
+```{r}
+# Taking a subset of required variables from the complete datasets
+
+neduc <- subset(educ, select=c("hhid", "zone","lga", "state", "sector", "indiv" ,"ea", "s02q08", "s02q13"))
+
+nhealth <- subset(health, select=c("hhid", "zone","lga", "state", "sector", "indiv" ,"ea", "s03q24"))
+
+nlabour <- subset(labour, select=c("hhid", "zone","lga", "state", "sector", "indiv" ,"ea", "s04aq05", "s04aq43"))
+
+nroster <- subset(roster, select=c("hhid", "zone","lga", "state", "sector", "indiv" ,"ea", "s01q02", "s01q07"))
+
+#Merging variables in one dataset
+
+merged_data <- inner_join(neduc, nhealth,by=c('hhid', 'zone',
+                            'lga', 'state', 'sector', 'indiv' ,'ea') ) %>% 
+  inner_join(nlabour,by=c('hhid', 'zone',
+                            'lga', 'state', 'sector', 'indiv' ,'ea') ) %>%  
+  inner_join(nroster, by=c('hhid', 'zone',
+                            'lga', 'state', 'sector', 'indiv' ,'ea') ) 
+                            
+  # Rename
+  merged_data <- merged_data %>% 
+  rename(education0= s02q08, educ.s02q13= s02q13, health=s03q24, gender0=s01q02, marriage=s01q07, labour.hrs=s04aq05, labour.wage=s04aq43) 
+  
+  
+```
+
+
+
+```{r}
+
+  # Filtering
+  #Creating a binary variable for gender, instead of being levels
+  #1- female and 0-male
+merged_data$gender <- ifelse(merged_data$gender0 == 2, 1, 0)
+
+
+#Creating the first binary education variable, 0- no education, 1- educated
+merged_data$education <- ifelse(merged_data$education0 == 1, 0, 1)
+
+
+#Creating the second binary education for alternative specification
+#6- Senior Secondary School
+# education lesser than Senior Secondary School = 0, else =1
+merged_data$education.alt <- ifelse(merged_data$education0 <= 6, 0, 1)
+
+```
+
+Further Data cleaning:
+
+```{r}
+
+#Dropping those who are done with the school system (For education) + who are too young to walk(For health) + who have informal relationships (For marriage)
+
+merged_data1 <- merged_data[!(merged_data$educ.s02q13==1 | merged_data$educ.s02q13==15 | merged_data$health==-1| merged_data$labour.wage==0| merged_data$marriage==3),]
+
+
+#Dropping NA observations
+merged_data1 <- merged_data1 %>% drop_na(education0, health, labour.hrs, gender0, marriage,labour.wage) 
+
+
+
+```
+
+
+
+```{r}
+#Choosing the levels according to our specific categories for marriage
+
+current_levels <- c(1,2,4,5,6,7) 
+new_levels <- c(0,1,2)
+
+#if the individual is married (either monogamous/polygamous) recoded to 1
+#else divorced/separated or widowed recoded to 2
+# unmarried individuals who never married are set to 0
+
+
+merged_data1$marriage.fct <- ifelse(merged_data1$marriage %in% current_levels[1:2], new_levels[2], ifelse(merged_data1$marriage %in% current_levels[4:6], new_levels[3],0))
+
+levels(merged_data1$marriage.fct) <- new_levels 
+
+merged_data1$marriage.fct <- as.factor(merged_data1$marriage.fct)
+merged_data1$marriage.fct <- relevel(merged_data1$marriage.fct, ref = "0")
+
+
+
+####doubt
+
+#health relevelling 
+current_levelshealth <- c(1,2,3,4)
+new_levelshealth <- c(1,2,3)
+
+merged_data1$health <- ifelse(merged_data1$health %in% current_levelshealth[2], new_levelshealth[1], ifelse(merged_data1$health %in% current_levelshealth[3],new_levelshealth[2], ifelse(merged_data1$health %in% current_levelshealth[4],new_levelshealth[3],0)))
+
+levels(merged_data1$health) <- new_levelshealth
+
+
+
+```
+
+```{r}
+#Outliers
+#Box plot of labour.hrs and labour.wage
+ggplot(merged_data1, aes(labour.hrs)) +
+  geom_boxplot(color = "black", outlier.colour = "blue")+
+  labs(title = "Number of Salaried Hours Worked in the Last 7 Days",
+      x = "Hours",
+      y = "Frequency") 
+
+```
+
+```{r}
+
+ggplot(merged_data1, aes(labour.wage)) +
+  geom_boxplot(color = "black", outlier.colour = "blue")+
+  labs(title = "Last cash payment for this job (excluding in-kind payment)",
+      x = "Payment (NAIRA)",
+      y = "Frequency") 
+
+```
+
+
+```{r}
+#histogram of labour.hrs and labour.wage
+
+hist_labour.hrs <- merged_data1$labour.hrs
+hist(hist_labour.hrs)
+
+#We note that labour.hrs has a normal distribution
+
+hist_labour.wage <- merged_data1$labour.wage
+hist(hist_labour.wage)
+
+#labour.wage doesn't have a normal distribution. Hence, we take a log transformation to make it normal to perform LPM model analysis.
+
+
+
+
+```
+```{r}
+#taking log for labour.wages
+merged_data1$labour.wage.lg=log( merged_data1$labour.wage)
+hist_labour.wage <- merged_data1$labour.wage.lg 
+hist(hist_labour.wage)
+```
+
+```{r}
+
+ggplot(merged_data1, aes(labour.wage.lg)) +
+  geom_boxplot(color = "black", outlier.colour = "blue")+
+  labs(title = "Last cash payment for this job (excluding in-kind payment)",
+      x = "log Payment (NAIRA)",
+      y = "Frequency") 
+
+```
