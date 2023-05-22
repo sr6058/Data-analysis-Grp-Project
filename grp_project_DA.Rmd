@@ -1,413 +1,78 @@
 
 
+*Research Question*
 
+What are the individual characteristics that hinder obtaining educational attainment in Nigeria? The individual characteristics we will be focusing on include health, labour hours, labour wages, marital status and gender of the individual.
+
+
+*Hypothesis*
+
+1) Health: We predict that having a physical disability that makes walking more difficult will have a negative correlation with educational attainment because it may make getting to school more difficult and increase drop out rate.
+
+H0: B1 = 0
+H1: B1 <0
+
+
+2) Labor hours: We predict that the hours worked per week will have a negative correlation with educational attainment because those who work more will have less time for school, and may have to work more to supplement household income which means they may not have enough money for school.
+
+Ho: B2 = 0
+H1: B2 < 0
+
+3) Labor wage: We predict that labor wage will have a positive correlation with educational attainment because those who make a higher wage will have to work less hours to make an adequate amount of money and will therefore have more time for school.
+
+Ho: B3 = 0
+H1: B3 > 0
+
+4) Marriage status: We predict that marriage status will have a correlation with educational attainment but are unsure of the direction in which it will have an impact because we believe that marriage affects men and women differently, particularly in conservative societies.
+
+Ho: B4 = 0
+H1: B4 != 0
+
+5) Gender: We predict that women will have lower educational attainment (higher drop-out rates) over all due the cultural effect of traditional gender roles.
+
+Ho: B5 = 0
+H1: B5 < 0
+
+6) Marriage status*Gender: We predict that marriage status will have a negative correlation with educational attainment when the individual is female due to the impact of traditional gender roles
+
+Ho: B6 = 0
+H1: B6 < 0
+
+For the purpose of this research project, we have decided that our statistical significance level will be 5%. For one sided tests, this will be a 10% significance level as given by the regressions here (as long as the direction of the effect is what we have predicted) because the significance tests given are automatically two-sided. For two-sided tests, this will be a 5% significance level as given by the regressions as usual. 
+
+Therefore, given that the direction of the effect is what we have predicted, those significant for a one-sided test will be shown by a '.', ' * ', ' ** ' or ' *** ' and those significant for a two-sided test will be shown by a ' * ', ' ** ' or ' *** '.
+
+
+
+*Literature Review*
+
+We will review literature readings for all our independent variables with respect to the dependent variable - educational attainment.
+
+Firstly, a study conducted in the United States by The Adolescent Society (1961), examines sex differences in the determinants of educational attainment and age at first marriage and in the relationship between these two variables. The results, based on estimation of a simultaneous-equation model, indicate that women's earlier age at marriage is an important factor limiting their educational attainment. Age at first marriage has no significant effect on the educational attainments of men but has a stronger effect on the educational attainments of women than any of the variables usually considered in male models of the educational attainment process. This study was conducted in the United States, which is a significantly more wealthy country than Nigeria. Also, there are significant cultural and religious differences between the two countries. It does not address how gender and marriage roles may be different in a setting like Nigeria, which is what we will address. 
+
+Another study conducted in the United States examined data from the Panel Study of Income Dynamics to find some evidence that, conditional on young adults’ own adolescent conditions, the adolescent conditions of their parents influence their household environment and by extension their educational attainment. This association appears to be concentrated among low-income households.Nigeria is a rapidly developing country, and thus the relationship between generational wealth and educational attainment may be different than in a country with stable growth such as the United States. There are also differences in public goods that may affect equity in educational attainment.
+
+A third study analysing the results for both men and women, show a strong negative effect of working while in school on the probability of graduation, although the results for females are more sensitive to the specifications used.This study is conducted in Canada that is significantly richer than Nigeria, so we are analyzing how working a job for supplemental income during schooling may have different impacts in a less wealthy country.
+
+The fourth study's results indicate that educational attainment is not equal for young adults with and without disabilities in a study in the United States. Despite the considerable strides made in the implementation of the Individuals with Disabilities Education Act, students with disabilities are not achieving educational parity in graded schooling.This study addresses how disability can affect education as a result of parental expectations, but it does not address how it can affect education as a result of inaccessibility due to physical disability. The United States is a different type of landscape as well, and may be more accessible than Nigeria due to public infrastructure. 
+
+From a study conducted in Nigeria, the empirical results show that a household's decision on whether to spend and how much to spend on educational and healthcare services are positively and significantly related to household income, household size and the level of education of the household head. The findings also reveal that female-headed households tend to spend more on education of household members and healthcare services, compared to male-headed households. This study shows household, not individual income, as a determinant of educational attainment. We are examining how individual income affects educational attainment. We are also examining how gender may affect educational attainment for the younger generation, as opposed to the gender of the household head. 
+
+Using the above literature review ideas, we will assume a null and alternative hypothesis and use statistical analysis to examine the strength and direction of this relationship.
+
+*Main Specification*
+
+The main hypothesis will have a dependent variable Education which is a binary variable, categorized on the basis of the individual being educated or not being educated. By using such a binary variable, we are able to separate and analyse the direct impact of the independent variables on the ability to obtain education in Nigeria. For our independent variables, we will include a discrete health variable, factored marriage variable, continuous labour hours variable, binary gender variable, continuous labour wage variable, and an interaction term between marriage and gender. Using a multiple regression, we will analyse the coefficients which represent the marginal effects of the independent variables on educational attainment. The interaction term will allow us to see the combined effect of marriage and gender to make inferences on the cultural practices in Nigeria and their impact on educational attainment.
+
+*Alternate Specification*
+
+For the alternate specification, we will be varying the threshold of educational attainment and regress it against the independent variables. The main hypothesis will have a threshold of being educated and not being educated. On the other hand, for the alternative specification, the cut-off is educational attainment less than secondary high school or greater educational attainment.
+
+As it categorizes the data differently from the main specification, we see the relationship the independent variables on less educated and highly educated groups as opposed to the original comparison of the relationship between uneducated and educated groups of people in Nigeria.
+
+```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-setwd("C:/Users/hp/Desktop/DA grp project")
-library(tidyverse)
-library(stargazer)
-library(gt)
-library(dplyr)
-educ <- read.csv("sect2_education.csv", na.strings = " ")
-health<-read.csv("sect3_health.csv", na.strings = " ")
-remittances<-read.csv("sect5_remittances.csv", na.strings = " ")
-roster<-read.csv("sect1_roster.csv", na.strings = " ")
-labour <- read.csv("sect4a1_labour.csv", na.strings = " ")
 
-
-
-
-Merging datasets
-
-
-neduc <- subset(educ, select=c("hhid", "zone","lga", "state", "sector", "indiv" ,"ea", "s02q08"))
-nhealth <- subset(health, select=c("hhid", "zone","lga", "state", "sector", "indiv" ,"ea", "s03q24"))
-nlabour <- subset(labour, select=c("hhid", "zone","lga", "state", "sector", "indiv" ,"ea", "s04aq05", "s04aq12"))
-nremittances <- subset(remittances, select=c("hhid", "zone","lga", "state", "sector", "indiv" ,"ea", "s05q02b", "s05q02a") )
-nroster <- subset(roster, select=c("hhid", "zone","lga", "state", "sector", "indiv" ,"ea", "s01q02"))
-
-#Merging variables in one dataset
-merged_data <- inner_join(neduc, nhealth,by=c('hhid', 'zone',
-                            'lga', 'state', 'sector', 'indiv' ,'ea') ) %>% 
-  inner_join(nlabour,by=c('hhid', 'zone',
-                            'lga', 'state', 'sector', 'indiv' ,'ea') ) %>%  
-  inner_join(nremittances, by=c('hhid', 'zone',
-                            'lga', 'state', 'sector', 'indiv' ,'ea') ) %>% 
-  inner_join(nroster, by=c('hhid', 'zone',
-                            'lga', 'state', 'sector', 'indiv' ,'ea') ) 
-
-
-
-
-
-#Ruqi's code
-#Merge Dataset Per Joint Unique Identifiers
-
-#please note this is not adjusted to a certain hh or indiv level.
-nEducation<-subset(Education, select = c( 'hhid','zone','lga', 'state', 'sector', 'indiv' ,'ea','s02q08'))
-nRemittances<-subset(Remittances, select = c('hhid', 'zone','lga', 'state', 'sector', 'indiv' ,'ea','s05q02a'))
-nRoster<-subset(Roster, select = c('hhid','zone','lga', 'state', 'sector', 'indiv' ,'ea','s01q02'))
-nHealth<-subset(Health, select = c( 'hhid','zone','lga', 'state', 'sector', 'indiv' ,'ea','s03q24'))
-
-#Merging Existin Datasets using Merge()
-merge_data <- merge(nEducation, nHealth, by=c( 'hhid','zone',
-                            'lga', 'state', 'sector', 'indiv' ,'ea'), all=TRUE)
-
-merge_data <- merge(merge_data, nRemittances, by=c('hhid','zone',
-                            'lga', 'state', 'sector', 'indiv' ,'ea'), all=TRUE)
-
-merge_data <- merge(merge_data, nRoster, by=c( 'hhid','zone',
-                            'lga', 'state', 'sector', 'indiv' ,'ea'), all=TRUE)
-#Rename the Columns on the Merged Data Set
-merge_data <- merge_data %>% 
-    rename(education=s02q08, health=s03q24, remittances=s05q02a,roster=s01q02)
-
-#Cleaning missing Values from the data set
- merge_data_drop <- merge_data %>% drop_na(education, health, remittances, roster)
- 
-
-
-
-#Ella's code (temporary)
-
-```{r setup, include = FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-setwd("/Users/ella/Downloads/Data Analysis Final Project/NGA_2018_LSS_v01_M_CSV/Household")
-
-library(tidyverse)
-library(stargazer)
-library(gt)
-library(dplyr)
-
-educ <- read.csv("sect2_education.csv", na.strings = " ")
-health<-read.csv("sect3_health.csv", na.strings = " ")
-labour <- read.csv("sect4a1_labour.csv", na.strings = " ")
-remittances<-read.csv("sect5_remittances.csv", na.strings = " ")
-roster<-read.csv("sect1_roster.csv", na.strings = " ")
-
-#s02q08: "What is [NAME]'s highest qualification attained?"
-#s02q13: "What is the main reason why [NAME] is not currently attending school?"
-neduc <- subset(educ, select=c("hhid", "zone","lga", "state", "sector", "indiv","ea", "s02q08", "s02q13"))
-#s03q24: "Does [NAME] have difficulty walking or climbing steps?"
-nhealth <- subset(health, select=c("hhid", "zone","lga", "state", "sector", "indiv","ea", "s03q24"))
-#s04aq05: "During the past 7 days, how many hours has [NAME] done wage/salaried work?"
-nlabour <- subset(labour, select=c("hhid", "zone","lga", "state", "sector", "indiv", "ea", "s04aq05"))
-#s05q02a: "What was the amount of cash [NAME] received?"
-#s05q02a: "Currency"
-nremittances <- subset(remittances, select=c("hhid", "zone","lga", "state", "sector", "indiv" ,"ea", "s05q02a", "s05q02b") )
-#s01q02: "What is the gender of [NAME]?"
-#s01q06b: "Year of birth"
-#s01q07: "What is [NAME]'s present marital status?"
-nroster <- subset(roster, select=c("hhid", "zone","lga", "state", "sector", "indiv", "ea", "s01q02", "s01q06b", "s01q07"))
-
-```
-
-
-```{r}
-#Merging Data
-merged_data <- inner_join(neduc, nhealth,by=c('hhid', 'zone',
-                            'lga', 'state', 'sector', 'indiv' ,'ea') ) %>% 
-  inner_join(nlabour,by=c('hhid', 'zone',
-                            'lga', 'state', 'sector', 'indiv' ,'ea') ) %>%  
-  inner_join(nroster, by=c('hhid', 'zone',
-                            'lga', 'state', 'sector', 'indiv' ,'ea') ) %>%
-  inner_join(nremittances, by=c('hhid', 'zone',
-                            'lga', 'state', 'sector', 'indiv' ,'ea') )
-```
-
-
-```{r}
-#Renaming variables for user friendliness
-merged_data <- merged_data %>% 
-    rename(education = s02q08, why = s02q13, health = s03q24, labor = s04aq05, remittances = s05q02a, currency = s05q02b, gender = s01q02, yearbirth = s01q06b, marriage = s01q07)
-```
-
-```{r}
-#Checking data
-print("Education:")
-typeof(merged_data$education)
-table(merged_data$education)
-print("Why:")
-typeof(merged_data$why)
-table(merged_data$why)
-print("Health:")
-typeof(merged_data$health)
-table(merged_data$health) #Note: Need to fix health because it is a list
-print("Labor:")
-typeof(merged_data$labor)
-table(merged_data$labor)
-print("Gender:")
-typeof(merged_data$gender)
-table(merged_data$gender)
-print("Birth Year:")
-typeof(merged_data$yearbirth)
-table(merged_data$yearofbirth) #Note: Why is this table of extent 0?
-```
-
-```{r}
-#Creating binary for gender (isfemale, 0 = No and 1 = Yes)
-merged_data$isfemale <- ifelse(merged_data$gender == 2, 1, 0)
-```
-
-```{r}
-#Creating the first binary education specification
-merged_data$educated_spef1 <- ifelse(merged_data$education == 1, 0, 1)
-table(merged_data$educated_spef1)
-
-#Creating the second binary education specification
-merged_data$educated_spef2 <- ifelse(merged_data$education <= 6, 0, 1)
-table(merged_data$educated_spef2)
-```
-
-```{r}
-#Dropping those who are done with the school system
-merged_data_dr <- subset(merged_data, why != 1 & why != 15)
-#Dropping NA observations
-merged_data_drop <- merged_data_dr %>% drop_na(education, health, labor, gender, yearbirth, marriage)
-```
-
-
-```{r}
-#Running regressions
-summary(lm(educated_spef1 ~ health + labor + yearbirth + isfemale*marriage, data = merged_data))
-summary(lm(educated_spef2 ~ health + labor + yearbirth + isfemale*marriage, data = merged_data))
-```
-# Ruqi's proposed alternative to the regression code
-Please note that the regressions have been assigned names in the off chance that there is a wait to plot MLRs.
-```{r}
-
-#Main regression with interaction term
-mint<-lm(educated_spef1 ~ health + labor + yearbirth + isfemale+ marriage+ isfemale*marriage, data = merged_data_drop)
-summary(mint)
-#Main regression without interaction term
-mwithoutint<-lm(educated_spef1 ~ health + labor + yearbirth + isfemale+ marriage+ isfemale*marriage, data = merged_data_drop)
-summary(mwithoutint)
-```
-
-```{r}
-#Alternative reaction with interaction term
-aint<-lm(educated_spef2 ~ health + labor + yearbirth + isfemale+ marriage+ isfemale*marriage, data = merged_data_drop)
-summary(aint)
-#Alternative Specification without interaction term
-awithoutint<-lm(educated_spef2 ~ health + labor + yearbirth + isfemale+marriage, data = merged_data_drop)
-summary(awithoutint)
-```
-# Ruqi's data visualization
-```{r}
-#Plotting the variables
-#Education is a categorical variable. It is most apt to use a bar graph to plot education.
-
-#Our first specification uses a cutoff between those who received no education at all vs. those who received some education.
-#0=No education and 1= Any education
-ggplot(merged_data_drop, aes(x=educated_spef1)) +
-  geom_bar(position = "dodge", width = 0.25, color= "blue", fill= "blue") + 
-  labs(x = "Level of Education", y = "Frequency") 
-#Please note we need to edit the y axis to show exactly the breakdown of the data.
-
-#Our breakdown of data for the alternative specification.
-#0= obtained at most a senior school certificate.
-#1=obtained education beyond a senior school certificate
-```
-
-
-```{r}
-##Our breakdown of data for the alternative specification.
-#0= obtained at most a senior school certificate.
-#1=obtained education beyond a senior school certificate
-ggplot(merged_data_drop, aes(x=educated_spef2)) +
-  geom_bar(position = "dodge", width = 0.25, color= "pink", fill= "pink") + 
-  labs(x = "Level of Education", y = "Frequency")
-```
-
-
-```{r}
-#Our data for labor is continuous. This variable we used looks at the amount of salaried hours those who took the survery worked in the last 7 days. To visualize this data, a boxplot is more appropriate. This will also provide us with some idea as to how the data is distributed and where outliers are.
-ggplot(merged_data_drop, aes(labor)) +
-  geom_boxplot(color = "black", outlier.colour = "blue")+
-  labs(title = "Number of Salaried Hours Worked in the Last 7 Days",
-      x = "Hours",
-      y = "Frequency")
-# There are numerous outliers on either side of the data
-#how to edit this code to show the median?
-
-```
-
-#Smriti: Added logit model analysis for the main regression
-
-
-Logit model analysis:
-```{r}
-logit.fit.1 = glm(educated_spef1 ~ health + labor + yearbirth + isfemale+ marriage,
-                  data=merged_data_drop,
-                  family=binomial(link=logit) )
-
-logit.fit.clog = glm(educated_spef1 ~ health + labor + yearbirth + isfemale+ marriage,
-                  data=merged_data_drop,
-                  family=binomial(link="cloglog") )
-
-stargazer(logit.fit.1, logit.fit.clog, type = "text", 
-          title = "Regression Results",
-          header = FALSE, digits = 2,
-          dep.var.caption = "Dependent Variable: education",
-          dep.var.labels.include = FALSE, single.row=TRUE, font.size = "small")
-
-```
-
-# Maitha's Code
-
-setwd("~/Documents/Spring'23/Data Anlaysis/Project")
-library(tidyverse)
-library(stargazer)
-library(lmtest)
-library(gt)
-library(dplyr)
-library(mfx)
-educ <- read.csv("sect2_education.csv", na.strings = " ")
-health<-read.csv("sect3_health.csv", na.strings = " ")
-roster<-read.csv("sect1_roster.csv", na.strings = " ")
-labour <- read.csv("sect4a1_labour.csv", na.strings = " ") 
-
-# MERGING
-neduc <- subset(educ, select=c("hhid", "zone","lga", "state", "sector", "indiv" ,"ea", "s02q08", "s02q13"))
-
-nhealth <- subset(health, select=c("hhid", "zone","lga", "state", "sector", "indiv" ,"ea", "s03q24"))
-
-nlabour <- subset(labour, select=c("hhid", "zone","lga", "state", "sector", "indiv" ,"ea", "s04aq05", "s04aq43"))
-
-nroster <- subset(roster, select=c("hhid", "zone","lga", "state", "sector", "indiv" ,"ea", "s01q02", "s01q07"))
-
-#Merging variables in one dataset
-
-merged_data <- inner_join(neduc, nhealth,by=c('hhid', 'zone',
-                            'lga', 'state', 'sector', 'indiv' ,'ea') ) %>% 
-  inner_join(nlabour,by=c('hhid', 'zone',
-                            'lga', 'state', 'sector', 'indiv' ,'ea') ) %>%  
-  inner_join(nroster, by=c('hhid', 'zone',
-                            'lga', 'state', 'sector', 'indiv' ,'ea') ) 
-                            
-  # Rename
-  merged_data <- merged_data %>% 
-  rename(education0= s02q08, educ.s02q13= s02q13, health=s03q24, gender0=s01q02, marriage=s01q07, labour.hrs=s04aq05, labour.wage=s04aq43) 
-  
-  # Filtering
-  #Creating a binary variable for gender, instead of being levels
-merged_data$gender <- ifelse(merged_data$gender0 == 2, 1, 0)
-
-#Creating the first binary education variable
-merged_data$education <- ifelse(merged_data$education0 == 1, 0, 1)
-
-#Creating the second binary education for alternative specification
-merged_data$education.alt <- ifelse(merged_data$education0 <= 6, 0, 1)
-
-#Dropping those who are done with the school system (For education) + who are too young to walk(For health) + who have informal relationships (For marraige)
-
-merged_data1 <- subset(merged_data, educ.s02q13 != 1 & educ.s02q13 != 15, health !=-1)
-merged_data1 <- subset(merged_data, labour.wage != 0)
-merged_data1 <- subset(merged_data, marriage != 3)
-
-#Dropping NA observations
-merged_data1 <- merged_data1 %>% drop_na(education0, health, labour.hrs, gender0, marriage,labour.wage) 
-
-#Choosing the levels according to our specific categories for marriage
-
-current_levels <- c(1,2,4,5,6,7) 
-new_levels <- c(0,1,2)
-
-merged_data1$marriage.fct <- ifelse(merged_data1$marriage %in% current_levels[1:2], new_levels[2], ifelse(merged_data1$marriage %in% current_levels[4:6], new_levels[3],0))
-
-levels(merged_data1$marriage.fct) <- new_levels 
-
-merged_data1$marriage.fct <- as.factor(merged_data1$marriage.fct)
-merged_data1$marriage.fct <- relevel(merged_data1$marriage.fct, ref = "0")
-
-# Outliers
-#Box plot of labour.hrs and labour.wage
-ggplot(merged_data1, aes(labour.hrs)) +
-  geom_boxplot(color = "black", outlier.colour = "blue")+
-  labs(title = "Number of Salaried Hours Worked in the Last 7 Days",
-      x = "Hours",
-      y = "Frequency") 
-
-ggplot(merged_data1, aes(labour.wage)) +
-  geom_boxplot(color = "black", outlier.colour = "blue")+
-  labs(title = "Last cash payment for this job (excluding in-kind payment)",
-      x = "Payment (NAIRA)",
-      y = "Frequency") 
-
-#histogram of labour.hrs and labour.wage
-
-hist_labour.hrs <- merged_data1$labour.hrs
-hist(hist_labour.hrs)
-
-hist_labour.wage <- merged_data1$labour.wage
-hist(hist_labour.wage)
-
-#Removing the outliers of labour.wage that have a number > 100000
-
-length(which(merged_data1$labour.wage > 1000000)) 
-merged_data1 <- subset(merged_data1, labour.wage < 1000000)
-
-
-# Regression
-
-#Running the first specification, without an interaction term
-
-regression0 <- lm(education ~ health + labour.hrs + labour.wage + marriage.fct + gender, data=merged_data1)
-summary(regression0)
-
-#Running the first specification, with an interaction term
-
-regression1 <- lm(education ~ health + labour.hrs + labour.wage + marriage.fct + gender + marriage.fct*gender, data=merged_data1)
-summary(regression1)
-
-#Running the alternative specification, without an interaction term
-
-regression2 <- lm(education.alt ~ health + labour.hrs + labour.wage + marriage1 + gender, data=merged_data1)
-summary(regression2)
-
-#Running the alternative specification, without an interaction term
-
-regression3 <- lm(education.alt ~ health + labour.hrs + labour.wage + marriage1 + gender + marriage1*gender, data=merged_data1)
-summary(regression3)
-
-
-# Robust SE
-
-#calculate robust standard errors for model coefficients
-coeftest(regression1, vcov = vcovHC(regression1, type = 'HC3'))
-
-#Table showing OLS and ROBUST standard errors
-stargazer(regression1,coeftest(regression1, vcovHC), type='text')
-
-
-#Joint significance under ROBUST standard errors
-
-linearHypothesis(regression1, c("marriage1=0", "health=0", "gender=0", "labour.wage=0", "labour.hrs=0"), white.adjust = "hc1")
-summary(regression1)$fstatistic 
-
-
-# LPM/ LOGIT
-
-lpm <- lm(education ~ health + labour.hrs + labour.wage + marriage1 + gender + marriage1*gender, data=merged_data1)
-summary(lpm)
-
-logit <- glm(education ~ health + labour.hrs + labour.wage + marriage1 + gender + marriage1*gender, data=merged_data1, family=binomial(link='logit'))
-summary(logit) 
-
-logitmfx(education ~ health + labour.hrs + labour.wage + marriage1 + gender + marriage1*gender, data=merged_data1, atmean=TRUE) 
-
-# sexy plot
-#Creating a visualization for regression
-# DROP NAS
-merged_data_new <- merged_data_new %>% drop_na(education, health, labor.hours, gender1, marriage.fct,labor.wages) 
-# regression
-softlaunch<-lm(maineducation~gender1+labor.hours+labor.wages+marriage.fct+ health + marriage.fct*gender1, data=merged_data_new)
-install.packages("car")
-library(car)
-avPlots(softlaunch)
-
-
-
-Smriti : Changes with log variable:
 
 setwd("C:/Users/hp/Desktop/DA grp project")
 library(tidyverse)
@@ -417,6 +82,7 @@ library(gt)
 library(dplyr)
 library(mfx)
 library(car)
+library(estimatr)
 educ <- read.csv("sect2_education.csv", na.strings = " ")
 health<-read.csv("sect3_health.csv", na.strings = " ")
 roster<-read.csv("sect1_roster.csv", na.strings = " ")
@@ -425,33 +91,45 @@ labour <- read.csv("sect4a1_labour.csv", na.strings = " ")
 
 ```
 
-Variables description:
+*Variables description:*
 
-Education:
-#s02q08: "What is [NAME]'s highest qualification attained?"
-#s02q13: "What is the main reason why [NAME] is not currently attending school?"
+* Education:
 
-Disability:
-#s03q24: "Does [NAME] have difficulty walking or climbing steps?"
+s02q08: "What is [NAME]'s highest qualification attained?"
+s02q13: "What is the main reason why [NAME] is not currently attending school?"
 
-Labor:
-#s04aq05: "During the past 7 days, how many hours has [NAME] done wage/salaried work?"
-#s01q07: "How much was [NAME]'s last cash payment for this job (excluding in-kind payment)?"
+* Disability:
 
-Roster:
-#s01q02: "What is the gender of [NAME]?"
-#s01q07: "What is [NAME]'s present marital status?"
+s03q24: "Does [NAME] have difficulty walking or climbing steps?"
 
-```{r}
+* Labor:
+
+s04aq05: "During the past 7 days, how many hours has [NAME] done wage/salaried work?"
+s01q07: "How much was [NAME]'s last cash payment for this job (excluding in-kind payment)?"
+
+* Roster:
+
+s01q02: "What is the gender of [NAME]?"
+s01q07: "What is [NAME]'s present marital status?"
+
+*Data Cleaning*
+
+```{r results = "asis"}
+
+
 # Taking a subset of required variables from the complete datasets
 
-neduc <- subset(educ, select=c("hhid", "zone","lga", "state", "sector", "indiv" ,"ea", "s02q08", "s02q13"))
+neduc <- subset(educ, select=c("hhid", "zone","lga", "state", "sector", "indiv" 
+                               ,"ea", "s02q08", "s02q13"))
 
-nhealth <- subset(health, select=c("hhid", "zone","lga", "state", "sector", "indiv" ,"ea", "s03q24"))
+nhealth <- subset(health, select=c("hhid", "zone","lga", "state", "sector", 
+                                   "indiv" ,"ea", "s03q24"))
 
-nlabour <- subset(labour, select=c("hhid", "zone","lga", "state", "sector", "indiv" ,"ea", "s04aq05", "s04aq43"))
+nlabour <- subset(labour, select=c("hhid", "zone","lga", "state", "sector", 
+                                   "indiv" ,"ea", "s04aq05", "s04aq43"))
 
-nroster <- subset(roster, select=c("hhid", "zone","lga", "state", "sector", "indiv" ,"ea", "s01q02", "s01q07"))
+nroster <- subset(roster, select=c("hhid", "zone","lga", "state", "sector", 
+                                   "indiv" ,"ea", "s01q02", "s01q07"))
 
 #Merging variables in one dataset
 
@@ -464,14 +142,15 @@ merged_data <- inner_join(neduc, nhealth,by=c('hhid', 'zone',
                             
   # Rename
   merged_data <- merged_data %>% 
-  rename(education0= s02q08, educ.s02q13= s02q13, health=s03q24, gender0=s01q02, marriage=s01q07, labour.hrs=s04aq05, labour.wage=s04aq43) 
+  rename(education0= s02q08, educ.s02q13= s02q13, health=s03q24, gender0=s01q02, 
+         marriage=s01q07, labour.hrs=s04aq05, labour.wage=s04aq43) 
   
   
 ```
 
 
 
-```{r}
+```{r results = "asis"}
 
   # Filtering
   #Creating a binary variable for gender, instead of being levels
@@ -490,17 +169,29 @@ merged_data$education.alt <- ifelse(merged_data$education0 <= 6, 0, 1)
 
 ```
 
-Further Data cleaning:
+*Further Data cleaning:*
 
-```{r}
+We will be removing those individuals who have are no longer interested in attaining education as they're either too old to attend, or had enough/ completed schooling.
 
-#Dropping those who are done with the school system (For education) + who are too young to walk(For health) + who have informal relationships (For marriage)
+Secondly, we will remove those individual's data who are too young to walk as they would be unable to get any form of education until a certain age.
 
-merged_data1 <- merged_data[!(merged_data$educ.s02q13==1 | merged_data$educ.s02q13==15 | merged_data$health==-1| merged_data$labour.wage==0| merged_data$marriage==3),]
+Finally, we will remove those data points who have informal relationships as this is beyond the scope of our analysis. We will be relevelling the marital status to either married, divorced/separated or widowed or single.
+
+```{r results = "asis"}
+
+#Dropping those who are done with the school system (For education) + who are too 
+#young to walk(For health) + who have informal relationships (For marriage)
+
+merged_data1 <- merged_data[!(merged_data$educ.s02q13==1 | 
+                                merged_data$educ.s02q13==15 | 
+                                merged_data$health==-1| 
+                                merged_data$labour.wage==0| 
+                                merged_data$marriage==3),]
 
 
 #Dropping NA observations
-merged_data1 <- merged_data1 %>% drop_na(education0, health, labour.hrs, gender0, marriage,labour.wage) 
+merged_data1 <- merged_data1 %>% drop_na(education0, health, labour.hrs, gender0, 
+                                         marriage,labour.wage) 
 
 
 
@@ -508,7 +199,7 @@ merged_data1 <- merged_data1 %>% drop_na(education0, health, labour.hrs, gender0
 
 
 
-```{r}
+```{r results = "asis"}
 #Choosing the levels according to our specific categories for marriage
 
 current_levels <- c(1,2,4,5,6,7) 
@@ -519,7 +210,11 @@ new_levels <- c(0,1,2)
 # unmarried individuals who never married are set to 0
 
 
-merged_data1$marriage.fct <- ifelse(merged_data1$marriage %in% current_levels[1:2], new_levels[2], ifelse(merged_data1$marriage %in% current_levels[4:6], new_levels[3],0))
+merged_data1$marriage.fct <- ifelse(merged_data1$marriage %in% 
+                                      current_levels[1:2], new_levels[2], 
+                                    ifelse(merged_data1$marriage %in% 
+                                             current_levels[4:6], 
+                                           new_levels[3],0))
 
 levels(merged_data1$marriage.fct) <- new_levels 
 
@@ -528,13 +223,19 @@ merged_data1$marriage.fct <- relevel(merged_data1$marriage.fct, ref = "0")
 
 
 
-####doubt
+#health relevelling: We relevel the health variable to start from 0 and ends at 3
 
-#health relevelling 
 current_levelshealth <- c(1,2,3,4)
 new_levelshealth <- c(1,2,3)
 
-merged_data1$health <- ifelse(merged_data1$health %in% current_levelshealth[2], new_levelshealth[1], ifelse(merged_data1$health %in% current_levelshealth[3],new_levelshealth[2], ifelse(merged_data1$health %in% current_levelshealth[4],new_levelshealth[3],0)))
+merged_data1$health <- ifelse(merged_data1$health %in% current_levelshealth[2], 
+                              new_levelshealth[1],
+                              ifelse(merged_data1$health %in% 
+                                    current_levelshealth[3],new_levelshealth[2], 
+                                    ifelse(merged_data1$health %in% 
+                                             current_levelshealth[4],
+                                new_levelshealth[3],0)))
+
 
 levels(merged_data1$health) <- new_levelshealth
 
@@ -542,9 +243,11 @@ levels(merged_data1$health) <- new_levelshealth
 
 ```
 
-```{r}
-#Outliers
-#Box plot of labour.hrs and labour.wage
+
+
+```{r results = "asis", out.width="70%"}
+#Checking for Outliers:
+#Box plot of labour.hrs 
 ggplot(merged_data1, aes(labour.hrs)) +
   geom_boxplot(color = "black", outlier.colour = "blue")+
   labs(title = "Number of Salaried Hours Worked in the Last 7 Days",
@@ -553,8 +256,8 @@ ggplot(merged_data1, aes(labour.hrs)) +
 
 ```
 
-```{r}
-
+```{r results = "asis", out.width="70%"}
+#Box plot of labour.wage
 ggplot(merged_data1, aes(labour.wage)) +
   geom_boxplot(color = "black", outlier.colour = "blue")+
   labs(title = "Last cash payment for this job (excluding in-kind payment)",
@@ -564,31 +267,38 @@ ggplot(merged_data1, aes(labour.wage)) +
 ```
 
 
-```{r}
+```{r, out.width="70%"}
 #histogram of labour.hrs and labour.wage
 
 hist_labour.hrs <- merged_data1$labour.hrs
 hist(hist_labour.hrs)
 
-#We note that labour.hrs has a normal distribution
 
+
+```
+
+We note that labour.hrs has a *normal distribution*.
+
+
+```{r}
 hist_labour.wage <- merged_data1$labour.wage
 hist(hist_labour.wage)
-
-#labour.wage doesn't have a normal distribution. Hence, we take a log transformation to make it normal to perform LPM model analysis.
-
 
 
 
 ```
-```{r}
-#taking log for labour.wages
+
+labour.wage doesn't have a normal distribution. Hence, we take a log transformation to make it normal to perform LPM model analysis.
+
+```{r, out.width="70%"}
+#taking log for labour.wages and plotting its histogram
 merged_data1$labour.wage.lg=log( merged_data1$labour.wage)
 hist_labour.wage <- merged_data1$labour.wage.lg 
 hist(hist_labour.wage)
 ```
 
-```{r}
+
+```{r, out.width="70%"}
 
 ggplot(merged_data1, aes(labour.wage.lg)) +
   geom_boxplot(color = "black", outlier.colour = "blue")+
@@ -597,3 +307,261 @@ ggplot(merged_data1, aes(labour.wage.lg)) +
       y = "Frequency") 
 
 ```
+
+
+Therefore, there are no significant outliers in log Payment and labour hours, and we don't need to remove them from the data.
+
+*Summary Statistics: Description of the Cleaned Data*
+```{r}
+summary(merged_data1)
+
+```
+
+
+
+\pagebreak
+
+
+*Multiple Regression Analysis*
+
+
+```{r}
+# Regression
+
+#Running the first specification, without an interaction term
+
+regression0 <- lm(education ~ health + labour.hrs + labour.wage.lg + marriage.fct 
+                  + gender, data=merged_data1)
+summary(regression0)
+
+
+```
+R-squared value is 0.1014, which means that the predictors explain about 10% of the variation in the education variable.
+
+
+
+
+
+*Data Visualisation*
+
+```{r}
+
+avPlots(regression0)
+
+```
+
+The above plots indicate the relationship between education and the individual independent variables. They visually depict the marginal effect of the variables on education.
+
+
+*Main Hypothesis*
+
+
+```{r}
+
+#Running the first specification, with an interaction term
+
+#Main hypothesis:
+
+regression1 <- lm(education ~ health + labour.hrs + labour.wage.lg + marriage.fct 
+                  + gender + marriage.fct*gender, data=merged_data1)
+summary(regression1)
+
+```
+
+Interpretation of the coefficients:
+
+* Intercept: The probability of obtaining educational attainment for the male, unmarried individual when health, labour.hrs labour.wages.lg is constant, is an average estimate of 20.44 % points.
+
+
+* health: The probability of obtaining educational attainment when health increases by 1 unit, holding all other independent variables constant is associated with a decrease of 5.56% points on average. 
+
+
+* labour.hrs: The probability of obtaining educational attainment when the labour.hrs worked increases by 1 hour, holding all other independent variables constant is associated with an increase of 0.058 % points on average.
+
+
+* labour.wage.lg : The probability of obtaining educational attainment when labour.wage.lg increases by 1%, holding all else constant is associated with an increase of 5.4% points on average.
+
+* marriage.fct1 : The probability of obtaining educational attainment when the individual is married is associated with an increase of 13.72% points than an unmarried individual on average, holding all else constant. 
+
+* marriage.fct2 : The probability of obtaining educational attainment when the individual is either widowed/separated/divorced is associated with an increase of 20.89% points than an unmarried individual on average, holding all else constant.
+
+* gender: The probability of obtaining educational attainment when the individual is female is associated with an increase of 15.24% points than a male on average, holding all else constant.
+
+We require an interaction term, as we want to see the effect of gender roles and marital status together and their impact on obtaining education. A female and married person for example, usually finds it harder to obtain education than a female who is unmarried.
+
+* marriage.fct1:gender: 
+
+If the individual is a married male, the probability of obtaining education, holding all else constant is associated with an increase of 34.16% points(20.44% + 13.72%).
+
+
+If the individual is a married female, the probability of obtaining education, holding all else constant is associated with an increase of 26.29% points(20.44% +  13.72% - 7.87%).
+
+
+* marriage.fct2:gender: 
+
+If the individual is a widowed/separated/divorced male, the probability of obtaining education, holding all else constant is associated with an increase of 41.33% points.
+
+If the individual is a widowed/separated/divorced female, the probability of obtaining education, holding all else constant is associated with an increase of 26.58% points.
+
+The relationship between education and the other independent variables is significantly different from 0 at a 5% confidence interval for all variables, except marriage.fct1:gender
+
+R2 : Almost 10.65% of the variation in educational attainment in explained by the independent variables above.
+
+
+*NOTES*
+
+* We note an greater increase in probability of single women attaining education than married women.
+
+* The gender variable resulted in surprising results. This can probably be explained by the interaction term later on. Perhaps, single women do have greater access to education. The unequal access to education for the female gender may also have decreased as a result of welfare programs conducted by the Nigerian Government. Additionally, women may also not be able to attain higher levels of education unlike men.
+Also perhaps, men are forced to join the labor force at an early age to earn income.
+
+*Alternative Specification*
+
+```{r}
+
+#Running the alternative specification, with an interaction term
+
+regression3 <- lm(education.alt ~ health + labour.hrs + labour.wage.lg + 
+                    marriage.fct + gender + marriage.fct*gender, 
+                  data=merged_data1)
+
+summary(regression3)
+
+```
+
+For the alternate specification, 25.61% of the variation in obtaining higher educational attainment is explained by the independent variables. This is greater than the explanatory power of our main hypothesis.
+
+The relationship between education and the other independent variables is significantly different from 0 at a 5% confidence interval for all variables, except health, marriage.fct2, gender, marriage.fct1:gender and marriage.fct2:gender.
+
+
+
+*Robust Standard Error Calculations*
+```{r}
+
+# Robust SE
+
+#calculate robust standard errors for model coefficients
+coeftest(regression1, vcov = vcovHC(regression1, type = 'HC3'))
+
+#Table showing OLS and ROBUST standard errors
+stargazer(regression1,coeftest(regression1, vcovHC), type='text')
+
+```
+We shall use these calculated robust standard errors, otherwise our t-tests will produce invalid results. Here, the robust standard errors are greater than the normal standard errors under OLS. If the variance of your error terms tends to be higher when x is far from its mean, OLS standard errors will tend to be biased down, and robust standard errors will tend to be larger than OLS standard errors.
+
+```{r}
+#F statistic
+summary(regression1)$fstatistic  
+
+```
+
+
+
+```{r}
+
+#Joint significance under normal standard errors
+regression1 <- lm(education ~ health + labour.hrs + labour.wage.lg + marriage.fct 
+                  + gender + marriage.fct*gender, data=merged_data1)
+summary(regression1)
+```
+
+
+```{r}
+
+
+#Joint significance under ROBUST standard errors
+
+Lhro <- lh_robust(education ~ health + labour.hrs +labour.wage.lg + marriage.fct 
+                  + gender + marriage.fct*gender, data=merged_data1, 
+                  linear_hypothesis = "health + labour.hrs + labour.wage.lg + 
+                  gender=0")
+summary(Lhro)
+
+```
+The F-statistic under robust standard error's joint significance test is lower than the F- statistic produced by Joint significance under normal standard errors. The p-values, are almost the same with a very slight difference. This indicates that the model with the robust standard errors allows for a better estimation.
+
+*Why the LOGIT Model?*
+
+LPM model analysis is not a good model for our regression as we have a binary dependent variable. These are the disadvantages:
+
+
+- LPM suffers from Heteroskedasticity, which affects the standard errors we use for hypothesis testing
+- Poor model fit.
+- Obtaining predicted probabilities that are less than 0 or greater than 1, as these are impossible.
+- Violating the zero conditional mean error assumption, which would mean that our coefficients are biased
+
+
+```{r}
+# LOGIT Model analysis
+
+
+logit <- glm(education ~ health + labour.hrs + labour.wage.lg + marriage.fct + 
+               gender + marriage.fct*gender, data=merged_data1, 
+             family=binomial(link='logit'))
+summary(logit) 
+
+```
+
+The coefficients of the logit model are the (constant) marginal effects of the variables on the log-odds ratio. 
+For example, the coefficient of the above logit model for health  -0.627375 is the marginal effect of health on the log-odds ratio. This can be applied to all the independent variables to interpret the coefficients.
+
+
+```{r}
+
+# partial effect (marginal effect) at the mean
+logitmfx(education ~ health + labour.hrs + labour.wage.lg + marriage.fct + gender 
+         + marriage.fct*gender, data=merged_data1, atmean=TRUE) 
+
+#average partial effect (average marginal effect)
+logitmfx(education ~ health + labour.hrs + labour.wage.lg + marriage.fct + gender 
+         + marriage.fct*gender, data=merged_data1, atmean=FALSE) 
+
+```
+
+
+
+*Interpretation of the output of logitmfx()*
+
+The output of the logitmfx() function provides information on how a one-unit increase in a predictor variable changes the probability of the outcome variable, while holding all other variables constant.
+
+The output of the logitmfx() function provides information on how a one-unit increase in the health variable changes the probability of the education variable, while holding all other variables constant.This can be applied to the other independent variables in the regression.
+
+
+*Discussion and Conclusion*
+
+
+* We use the Logit model to estimate the regression, and not use the LPM model. This is because our regression has a binary dependent variable and LPM models result in heteroskedascity for such models and irregular probabilities.
+
+* Using the main hypothesis regressions, we were able to reject the null hypothesis at the 5% level for all variables, except marriage.fct1:gender
+
+*Limitations*
+
+* In the future, we can add more independent variables in the multiple regression to explain the impact on educational attainment in a better manner. This would also reduce the error for the regression.
+
+* We can test the hypothesis differently, by using variables on a household level rather than an individual level.
+
+* We still cannot claim causality, and use our above analysis to show correlation between educational attainment and the chosen independent variables.
+
+* We can use different sources to gather data and include more data points to
+to improve accuracy.
+
+* Sample Bias: The sample data collected in the data set may include bias, which may impact our results and interpetations.
+
+
+
+
+
+*Appendix*
+
+Marini, M. M. (1978). The transition to adulthood: Sex differences in educational attainment and age at marriage. American Sociological Review, 43(4), 483. https://doi.org/10.2307/2094774
+
+Ogundari, K., & Abdulai, A. (2014). Determinants of household's education and healthcare spending in Nigeria: Evidence from survey data. African Development Review, 26(1), 1–14. https://doi.org/10.1111/1467-8268.12060 
+
+Onwuameze, N. C. (2013). Educational opportunity and inequality in Nigeria: Assessing social background, gender, and regional effects. The University of Iowa ProQuest Dissertations Publishing, 1–189. https://doi.org/10.17077/etd.bs85au87
+
+Parent, D. (2006). Work while in High School in Canada: Its labour market and educational attainment effects. Canadian Journal of Economics/Revue Canadienne D'economique, 39(4), 1125–1150. https://doi.org/10.1111/j.1540-5982.2006.00384.x
+
+Shandra, C. L., & Hogan, D. P. (2009). The educational attainment process among adolescents with disabilities and children of parents with disabilities. International Journal of Disability, Development and Education, 56(4), 363–379. https://doi.org/10.1080/10349120903306616
+
+Wightman, P., & Danziger, S. (2014). Multi-generational income disadvantage and the educational attainment of young adults. Research in Social Stratification and Mobility, 35, 53–69. https://doi.org/10.1016/j.rssm.2013.09.004 
+
